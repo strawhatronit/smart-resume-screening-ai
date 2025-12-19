@@ -81,27 +81,28 @@ job_description = st.text_area(
 )
 
 if st.button("🔍 Find Best Candidates"):
+
     if uploaded_files:
-    names = []
-    texts = []
+        names = []
+        texts = []
 
-    for file in uploaded_files:
-        names.append(file.name)
-        texts.append(extract_text(file))
+        for file in uploaded_files:
+            names.append(file.name)
+            texts.append(extract_text(file))
 
-    df = pd.DataFrame({
-        "name": names,
-        "resume_text": texts
-    })
+        df = pd.DataFrame({
+            "name": names,
+            "resume_text": texts
+        })
 
-    df['cleaned_resume'] = df['resume_text'].apply(clean_text)
+        df['cleaned_resume'] = df['resume_text'].apply(clean_text)
 
-    vectorizer = TfidfVectorizer(stop_words='english')
-    resume_vectors = vectorizer.fit_transform(df['cleaned_resume'])
+        vectorizer = TfidfVectorizer()
+        resume_vectors = vectorizer.fit_transform(df['cleaned_resume'])
 
     else:
-    st.warning("Please upload at least one resume.")
-    st.stop()
+        st.warning("Please upload at least one resume.")
+        st.stop()
 
     if job_description.strip() == "":
         st.warning("Please enter job requirements.")
@@ -109,10 +110,9 @@ if st.button("🔍 Find Best Candidates"):
         clean_job = clean_text(job_description)
         job_vector = vectorizer.transform([clean_job])
         scores = cosine_similarity(job_vector, resume_vectors)
+
         df['match_score'] = scores[0]
         ranked = df.sort_values(by='match_score', ascending=False)
 
         st.subheader("📊 Ranked Candidates")
         st.dataframe(ranked[['name', 'match_score']])
-
-

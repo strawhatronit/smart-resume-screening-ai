@@ -15,14 +15,18 @@ data = {
         "Neha Verma",
         "Rahul Singh",
         "Priya Patel",
-        "Karan Mehta"
+        "Karan Mehta",
+        "Sonal Iyer",
+        "Arjun Rao"
     ],
     "resume_text": [
         "Python developer with experience in machine learning, data analysis, SQL and statistics",
         "Java developer with knowledge of Spring Boot, Hibernate, MySQL and backend development",
         "Data analyst skilled in Python, SQL, Excel, Power BI and machine learning basics",
         "Frontend developer with skills in HTML, CSS, JavaScript, React and UI design",
-        "Software engineer experienced in Python, Django, REST APIs, SQL and cloud basics"
+        "Software engineer experienced in Python, Django, REST APIs, SQL and cloud basics",
+        "AI engineer skilled in deep learning, NLP, Python",
+        "Cloud engineer with AWS, Docker, Linux, Python"
     ]
 }
 

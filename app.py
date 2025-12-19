@@ -99,7 +99,7 @@ if st.button("🔍 Find Best Candidates"):
     vectorizer = TfidfVectorizer(stop_words='english')
     resume_vectors = vectorizer.fit_transform(df['cleaned_resume'])
 
-else:
+    else:
     st.warning("Please upload at least one resume.")
     st.stop()
 

@@ -71,6 +71,16 @@ def extract_text(file):
     elif file.name.endswith(".docx"):
         return docx2txt.process(file)
 
+def split_applicants(text):
+    applicants = []
+    blocks = text.split("\n\n")  # split by blank lines
+
+    for block in blocks:
+        if len(block.strip()) > 50:  # ignore very small chunks
+            applicants.append(block.strip())
+
+    return applicants
+
 
 
 st.write("Enter job requirements below:")
@@ -87,8 +97,12 @@ if st.button("🔍 Find Best Candidates"):
         texts = []
 
         for file in uploaded_files:
-            names.append(file.name)
-            texts.append(extract_text(file))
+            full_text = extract_text(file)
+            applicant_blocks = split_applicants(full_text)
+
+            for i, block in enumerate(applicant_blocks):
+                names.append(f"{file.name}_candidate_{i+1}")
+                texts.append(block)
 
         df = pd.DataFrame({
             "name": names,

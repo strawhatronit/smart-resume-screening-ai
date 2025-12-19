@@ -71,13 +71,21 @@ def extract_text(file):
     elif file.name.endswith(".docx"):
         return docx2txt.process(file)
 
-def split_applicants(text):
-    applicants = []
-    blocks = text.split("\n\n")  # split by blank lines
+import re
 
-    for block in blocks:
-        if len(block.strip()) > 50:  # ignore very small chunks
-            applicants.append(block.strip())
+def split_applicants(text):
+    parts = re.split(r'(B\.Tech|B\.E|MCA|M\.Tech|BCA|M\.Sc)', text)
+    applicants = []
+
+    current = ""
+    for part in parts:
+        current += " " + part
+        if len(current.strip()) > 150:
+            applicants.append(current.strip())
+            current = ""
+
+    if current.strip():
+        applicants.append(current.strip())
 
     return applicants
 

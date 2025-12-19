@@ -1,0 +1,68 @@
+import streamlit as st
+import pandas as pd
+import re
+import nltk
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+nltk.download('stopwords')
+
+# --------- DATA ----------
+data = {
+    "name": [
+        "Amit Sharma",
+        "Neha Verma",
+        "Rahul Singh",
+        "Priya Patel",
+        "Karan Mehta"
+    ],
+    "resume_text": [
+        "Python developer with experience in machine learning, data analysis, SQL and statistics",
+        "Java developer with knowledge of Spring Boot, Hibernate, MySQL and backend development",
+        "Data analyst skilled in Python, SQL, Excel, Power BI and machine learning basics",
+        "Frontend developer with skills in HTML, CSS, JavaScript, React and UI design",
+        "Software engineer experienced in Python, Django, REST APIs, SQL and cloud basics"
+    ]
+}
+
+df = pd.DataFrame(data)
+
+# --------- CLEANING ----------
+stop_words = set(stopwords.words('english'))
+
+def clean_text(text):
+    text = text.lower()
+    text = re.sub('[^a-zA-Z]', ' ', text)
+    words = text.split()
+    words = [w for w in words if w not in stop_words]
+    return ' '.join(words)
+
+df['cleaned_resume'] = df['resume_text'].apply(clean_text)
+
+# --------- VECTORIZATION ----------
+vectorizer = TfidfVectorizer()
+resume_vectors = vectorizer.fit_transform(df['cleaned_resume'])
+
+# --------- UI ----------
+st.title("🤖 Smart Resume Screening with AI")
+
+st.write("Enter job requirements below:")
+
+job_description = st.text_area(
+    "Job Description",
+    placeholder="Example: Python, Machine Learning, SQL, Data Analysis"
+)
+
+if st.button("🔍 Find Best Candidates"):
+    if job_description.strip() == "":
+        st.warning("Please enter job requirements.")
+    else:
+        clean_job = clean_text(job_description)
+        job_vector = vectorizer.transform([clean_job])
+        scores = cosine_similarity(job_vector, resume_vectors)
+        df['match_score'] = scores[0]
+        ranked = df.sort_values(by='match_score', ascending=False)
+
+        st.subheader("📊 Ranked Candidates")
+        st.dataframe(ranked[['name', 'match_score']])

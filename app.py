@@ -5,6 +5,9 @@ import nltk
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import PyPDF2
+import docx2txt
+
 
 nltk.download('stopwords')
 
@@ -50,6 +53,25 @@ resume_vectors = vectorizer.fit_transform(df['cleaned_resume'])
 
 # --------- UI ----------
 st.title("🤖 Smart Resume Screening with AI")
+st.subheader("📄 Upload Resumes")
+
+uploaded_files = st.file_uploader(
+    "Upload PDF or DOCX resumes",
+    type=["pdf", "docx"],
+    accept_multiple_files=True
+)
+def extract_text(file):
+    if file.name.endswith(".pdf"):
+        reader = PyPDF2.PdfReader(file)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text()
+        return text
+
+    elif file.name.endswith(".docx"):
+        return docx2txt.process(file)
+
+
 
 st.write("Enter job requirements below:")
 
@@ -59,6 +81,28 @@ job_description = st.text_area(
 )
 
 if st.button("🔍 Find Best Candidates"):
+    if uploaded_files:
+    names = []
+    texts = []
+
+    for file in uploaded_files:
+        names.append(file.name)
+        texts.append(extract_text(file))
+
+    df = pd.DataFrame({
+        "name": names,
+        "resume_text": texts
+    })
+
+    df['cleaned_resume'] = df['resume_text'].apply(clean_text)
+
+    vectorizer = TfidfVectorizer(stop_words='english')
+    resume_vectors = vectorizer.fit_transform(df['cleaned_resume'])
+
+else:
+    st.warning("Please upload at least one resume.")
+    st.stop()
+
     if job_description.strip() == "":
         st.warning("Please enter job requirements.")
     else:
@@ -70,3 +114,5 @@ if st.button("🔍 Find Best Candidates"):
 
         st.subheader("📊 Ranked Candidates")
         st.dataframe(ranked[['name', 'match_score']])
+
+
